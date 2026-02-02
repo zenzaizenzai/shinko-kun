@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>しんこくん | 確定申告のロゼッタストーン</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@400;700;800&family=Noto+Sans+JP:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="mode-employee">
+    <div id="app">
+        <header>
+            <h1>しんこくん <span style="font-weight: 300; opacity: 0.5; font-size: 1.5rem;">Shinko-kun</span></h1>
+            <p class="tagline">行政の言葉を「翻訳」して、自分だけの確定申告メモを作ろう。</p>
+            <div id="save-status" class="save-status">自動保存済み (Local)</div>
+        </header>
+
+        <div class="switches-container">
+            <div class="segmented-control">
+                <button class="mode-btn active" id="btn-employee">会社・バイトのみ</button>
+                <button class="mode-btn" id="btn-business">個人事業・フリーランスあり</button>
+            </div>
+            <div class="segmented-control year-control">
+                <button class="mode-btn active" id="btn-2024">2024年分 (令和6年)</button>
+                <button class="mode-btn" id="btn-2025">2025年分 (令和7年)</button>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+
+        <main>
+            <section class="input-area">
+                <div class="card">
+                    <h3 class="section-title">💰 もらったお金（収入）</h3>
+
+                    <div class="input-group" data-mode-only="employee">
+                        <div class="input-label-row">
+                            <span class="term" data-official="給与所得">会社からもらった給料（総額）</span>
+                            <span class="hint">源泉徴収票「支払金額」</span>
+                        </div>
+                        <input type="number" id="inc-salary" class="input-modern" placeholder="0">
+                    </div>
+
+                    <div data-mode-only="business">
+                        <div class="input-row-multi">
+                            <div class="input-group">
+                                <div class="input-label-row"><span class="term" data-official="売上金額">売上げ（入金合計）</span>
+                                </div>
+                                <input type="number" id="inc-sales" class="input-modern" placeholder="0">
+                            </div>
+                            <div class="input-group">
+                                <div class="input-label-row"><span class="term" data-official="必要経費">使ったお金（経費）合計</span>
+                                </div>
+                                <input type="number" id="inc-expenses" class="input-modern" placeholder="0" readonly
+                                    style="opacity: 0.6; cursor: not-allowed;">
+                            </div>
+                        </div>
+
+                        <!-- 経費内訳 -->
+                        <div class="expense-breakdown">
+                            <h4 style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.8rem; opacity: 0.8;">
+                                ▼ 経費の内訳</h4>
+                            <div class="input-row-multi">
+                                <div class="input-group">
+                                    <div class="input-label-row"><span class="term" data-official="消耗品費">パソコン・備品代</span>
+                                    </div>
+                                    <input type="number" id="exp-supplies" class="input-modern exp-sub-input"
+                                        placeholder="0">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-label-row"><span class="term" data-official="旅費交通費">乗り物代・宿泊</span>
+                                    </div>
+                                    <input type="number" id="exp-travel" class="input-modern exp-sub-input"
+                                        placeholder="0">
+                                </div>
+                            </div>
+                            <div class="input-row-multi">
+                                <div class="input-group">
+                                    <div class="input-label-row"><span class="term" data-official="通信費">ネット・スマホ代</span>
+                                    </div>
+                                    <input type="number" id="exp-comm" class="input-modern exp-sub-input"
+                                        placeholder="0">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-label-row"><span class="term"
+                                            data-official="地代家賃・水道光熱費">家賃・電気代</span></div>
+                                    <input type="number" id="exp-rent" class="input-modern exp-sub-input"
+                                        placeholder="0">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <div class="input-label-row"><span class="term"
+                                        data-official="接待交際費・広告宣伝費など">つきあい・宣伝・その他</span></div>
+                                <input type="number" id="exp-other" class="input-modern exp-sub-input" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <div class="input-label-row">
+                                <span class="term" data-official="青色申告特別控除">帳簿の特典割引</span>
+                                <span class="hint">最大65万円</span>
+                            </div>
+                            <input type="number" id="inc-blue-deduction" class="input-modern" value="650000">
+                        </div>
+                    </div>
+
+                    <div class="input-row-multi">
+                        <div class="input-group">
+                            <div class="input-label-row"><span class="term" data-official="公的年金等・雑所得">年金や副業の利益</span>
+                            </div>
+                            <input type="number" id="inc-misc" class="input-modern" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <div class="input-label-row"><span class="term" data-official="配当所得">株の配当など</span></div>
+                            <input type="number" id="inc-dividend" class="input-modern" placeholder="0">
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">🛡️ ひいてもらえる額（控除）</h3>
+                    <div class="input-row-multi">
+                        <div class="input-group">
+                            <div class="input-label-row"><span class="term" data-official="社会保険料控除">社保・年金</span><span
+                                    class="hint">健保/国民年金</span></div>
+                            <input type="number" id="ded-social" class="input-modern" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <div class="input-label-row"><span class="term" data-official="生命保険料控除">生命保険</span><span
+                                    class="hint">介護/年金保険も</span></div>
+                            <input type="number" id="ded-life" class="input-modern" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-row-multi">
+                        <div class="input-group">
+                            <div class="input-label-row"><span class="term" data-official="小規模企業共済等掛金控除">iDeCoなど</span>
+                            </div>
+                            <input type="number" id="ded-ideco" class="input-modern" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <div class="input-label-row"><span class="term" data-official="地震保険料控除">地震保険</span></div>
+                            <input type="number" id="ded-earthquake" class="input-modern" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-row-multi">
+                        <div class="input-group">
+                            <div class="input-label-row"><span class="term" data-official="寄附金控除">ふるさと納税額</span></div>
+                            <input type="number" id="ded-furusato" class="input-modern" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <div class="input-label-row"><span class="term" data-official="医療費控除">病院代（領収書合計）</span>
+                            </div>
+                            <input type="number" id="ded-medical" class="input-modern" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <span class="term" data-official="配偶者(特別)控除・扶養控除">家族を養っている分</span>
+                        </div>
+                        <input type="number" id="ded-family" class="input-modern" placeholder="0">
+                    </div>
+
+                    <h3 class="section-title">⚓ すでに払った分・直接引ける分</h3>
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <span class="term" data-official="源泉徴収税額">すでに天引きされた税金</span>
+                        </div>
+                        <input type="number" id="tax-paid" class="input-modern" placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <span class="term" data-official="住宅借入金等特別控除">住宅ローンの割引</span>
+                            <span class="hint">税額そのものを直接引けます</span>
+                        </div>
+                        <input type="number" id="tax-home-loan" class="input-modern" placeholder="0">
+                    </div>
+                </div>
+            </section>
+
+            <section class="output-area">
+                <div class="card">
+                    <div class="preview-header">
+                        <h3>📋 e-Tax 用 Markdown メモ</h3>
+                        <button id="copy-btn">メモをコピー</button>
+                    </div>
+                    <div id="preview" class="markdown-preview"></div>
+                    <div class="data-controls">
+                        <button id="clear-btn" class="btn-clear text-btn">全てのデータを消去する</button>
+                    </div>
+                </div>
+                <p class="security-note">※データはブラウザにのみ保存され、サーバーへ送信されることはありません。</p>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>
