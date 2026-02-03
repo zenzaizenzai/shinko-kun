@@ -34,169 +34,294 @@
             <div class="progress-fill" id="progress"></div>
         </div>
 
-        <main>
-            <section class="input-area">
-                <div class="card">
-                    <h3 class="section-title">💰 もらったお金（収入）</h3>
-
-                    <div class="input-group" data-mode-only="employee">
-                        <div class="input-label-row">
-                            <span class="term" data-official="給与所得">会社からもらった給料（総額）</span>
-                            <span class="hint">源泉徴収票「支払金額」</span>
-                        </div>
-                        <input type="number" id="inc-salary" class="input-modern" placeholder="0">
-                    </div>
-
-                    <div data-mode-only="business">
-                        <div class="input-row-multi">
-                            <div class="input-group">
-                                <div class="input-label-row"><span class="term" data-official="売上金額">売上げ（入金合計）</span>
-                                </div>
-                                <input type="number" id="inc-sales" class="input-modern" placeholder="0">
-                            </div>
-                            <div class="input-group">
-                                <div class="input-label-row"><span class="term" data-official="必要経費">使ったお金（経費）合計</span>
-                                </div>
-                                <input type="number" id="inc-expenses" class="input-modern" placeholder="0" readonly
-                                    style="opacity: 0.6; cursor: not-allowed;">
-                            </div>
-                        </div>
-
-                        <!-- 経費内訳 -->
-                        <div class="expense-breakdown">
-                            <h4 style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.8rem; opacity: 0.8;">
-                                ▼ 経費の内訳</h4>
-                            <div class="input-row-multi">
-                                <div class="input-group">
-                                    <div class="input-label-row"><span class="term" data-official="消耗品費">パソコン・備品代</span>
+        <main class="visual-main">
+            <!-- Stage 1: 天秤 (商売の収支) - 個人事業主のみ表示 -->
+            <section class="viz-stage balance-stage-full card" data-mode-only="business">
+                <h3 class="stage-title">1. 商売の収支を量る <span class="doc-badge">青色申告決算書 (1〜3枚目)</span></h3>
+                <div class="scale-container-viz">
+                    <div class="scale-base-viz">
+                        <div class="scale-pillar-viz"></div>
+                        <div class="scale-beam-viz" id="scale-beam">
+                            <!-- 左皿: 売上げ -->
+                            <div class="scale-pan-viz left-pan-viz">
+                                <div class="pan-content">
+                                    <div class="pan-label-top">損益計算書 (収入)</div>
+                                    <div class="input-group-viz">
+                                        <div class="pan-label-mini">1 売上金額</div>
+                                        <div class="input-with-action">
+                                            <input type="number" id="inc-sales" class="input-viz" placeholder="0">
+                                            <button class="btn-mini-action" id="btn-open-monthly"
+                                                title="月別に計算">🗓️</button>
+                                        </div>
                                     </div>
-                                    <input type="number" id="exp-supplies" class="input-modern exp-sub-input"
-                                        placeholder="0">
-                                </div>
-                                <div class="input-group">
-                                    <div class="input-label-row"><span class="term" data-official="旅費交通費">乗り物代・宿泊</span>
+                                    <div class="pan-visual">
+                                        <div class="pan-stack" id="income-stack"></div>
                                     </div>
-                                    <input type="number" id="exp-travel" class="input-modern exp-sub-input"
-                                        placeholder="0">
                                 </div>
                             </div>
-                            <div class="input-row-multi">
-                                <div class="input-group">
-                                    <div class="input-label-row"><span class="term" data-official="通信費">ネット・スマホ代</span>
+                            <!-- 右皿: 経費 -->
+                            <div class="scale-pan-viz right-pan-viz">
+                                <div class="pan-content">
+                                    <div class="pan-label-top">損益計算書 (経費)</div>
+                                    <div class="pan-inputs">
+                                        <div class="input-group-viz">
+                                            <div class="pan-label-mini term" data-official="損益計算書 43番">43 経費合計</div>
+                                            <div class="input-with-action">
+                                                <input type="number" id="inc-expenses" class="input-viz" readonly
+                                                    placeholder="計">
+                                                <button class="btn-mini-action" id="btn-open-expenses"
+                                                    title="内訳を入力">📝</button>
+                                            </div>
+                                        </div>
+                                        <div class="expense-details-grid">
+                                            <div class="mini-field">
+                                                <div class="pan-label-mini">売上原価 (仕入)</div>
+                                                <input type="number" id="val-summary-cogs" class="input-viz-mini"
+                                                    readonly placeholder="0">
+                                            </div>
+                                            <div class="mini-field">
+                                                <div class="pan-label-mini">一般経費の合計</div>
+                                                <input type="number" id="val-summary-others" class="input-viz-mini"
+                                                    readonly placeholder="0">
+                                            </div>
+                                        </div>
                                     </div>
-                                    <input type="number" id="exp-comm" class="input-modern exp-sub-input"
-                                        placeholder="0">
-                                </div>
-                                <div class="input-group">
-                                    <div class="input-label-row"><span class="term"
-                                            data-official="地代家賃・水道光熱費">家賃・電気代</span></div>
-                                    <input type="number" id="exp-rent" class="input-modern exp-sub-input"
-                                        placeholder="0">
+                                    <div class="pan-visual">
+                                        <div class="pan-stack" id="expense-stack"></div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="input-group">
-                                <div class="input-label-row"><span class="term"
-                                        data-official="接待交際費・広告宣伝費など">つきあい・宣伝・その他</span></div>
-                                <input type="number" id="exp-other" class="input-modern exp-sub-input" placeholder="0">
-                            </div>
                         </div>
+                    </div>
+                </div>
+                <div class="stage-result">
+                    事業の利益: <span id="viz-biz-income">0</span> 円
+                </div>
+            </section>
 
-                        <div class="input-group">
-                            <div class="input-label-row">
-                                <span class="term" data-official="青色申告特別控除">帳簿の特典割引</span>
-                                <span class="hint">最大65万円</span>
+            <!-- Stage 2: フロー (削り出し) - 全員表示 -->
+            <section class="viz-stage flow-stage-full card">
+                <h3 class="stage-title">2. 税金がかかる分を削り落とす <span class="doc-badge">確定申告書B (第一表・第二表)</span></h3>
+                <div class="flow-container-new">
+                    <!-- 合計所得の源泉 -->
+                    <div class="flow-source">
+                        <div class="source-box">
+                            <div class="source-label">収入のまとめ (合計所得)</div>
+                            <div class="source-value"><span id="val-flow-income">0</span> 円</div>
+                            <div class="source-inputs">
+                                <div class="mini-field" data-mode-only="employee">
+                                    <label>お給料</label>
+                                    <input type="number" id="inc-salary" class="input-flow" placeholder="0">
+                                </div>
+                                <div class="mini-field">
+                                    <label>副業等</label>
+                                    <input type="number" id="inc-misc" class="input-flow" placeholder="0">
+                                </div>
+                                <div class="mini-field">
+                                    <label>株など</label>
+                                    <input type="number" id="inc-dividend" class="input-flow" placeholder="0">
+                                </div>
                             </div>
-                            <input type="number" id="inc-blue-deduction" class="input-modern" value="650000">
-                        </div>
-                    </div>
-
-                    <div class="input-row-multi">
-                        <div class="input-group">
-                            <div class="input-label-row"><span class="term" data-official="公的年金等・雑所得">年金や副業の利益</span>
-                            </div>
-                            <input type="number" id="inc-misc" class="input-modern" placeholder="0">
-                        </div>
-                        <div class="input-group">
-                            <div class="input-label-row"><span class="term" data-official="配当所得">株の配当など</span></div>
-                            <input type="number" id="inc-dividend" class="input-modern" placeholder="0">
-                        </div>
-                    </div>
-
-                    <h3 class="section-title">🛡️ ひいてもらえる額（控除）</h3>
-                    <div class="input-row-multi">
-                        <div class="input-group">
-                            <div class="input-label-row"><span class="term" data-official="社会保険料控除">社保・年金</span><span
-                                    class="hint">健保/国民年金</span></div>
-                            <input type="number" id="ded-social" class="input-modern" placeholder="0">
-                        </div>
-                        <div class="input-group">
-                            <div class="input-label-row"><span class="term" data-official="生命保険料控除">生命保険</span><span
-                                    class="hint">介護/年金保険も</span></div>
-                            <input type="number" id="ded-life" class="input-modern" placeholder="0">
-                        </div>
-                    </div>
-                    <div class="input-row-multi">
-                        <div class="input-group">
-                            <div class="input-label-row"><span class="term" data-official="小規模企業共済等掛金控除">iDeCoなど</span>
-                            </div>
-                            <input type="number" id="ded-ideco" class="input-modern" placeholder="0">
-                        </div>
-                        <div class="input-group">
-                            <div class="input-label-row"><span class="term" data-official="地震保険料控除">地震保険</span></div>
-                            <input type="number" id="ded-earthquake" class="input-modern" placeholder="0">
-                        </div>
-                    </div>
-                    <div class="input-row-multi">
-                        <div class="input-group">
-                            <div class="input-label-row"><span class="term" data-official="寄附金控除">ふるさと納税額</span></div>
-                            <input type="number" id="ded-furusato" class="input-modern" placeholder="0">
-                        </div>
-                        <div class="input-group">
-                            <div class="input-label-row"><span class="term" data-official="医療費控除">病院代（領収書合計）</span>
-                            </div>
-                            <input type="number" id="ded-medical" class="input-modern" placeholder="0">
                         </div>
                     </div>
 
-                    <div class="input-group">
-                        <div class="input-label-row">
-                            <span class="term" data-official="配偶者(特別)控除・扶養控除">家族を養っている分</span>
+                    <div class="flow-arrow"></div>
+
+                    <!-- 控除ゲート -->
+                    <div class="flow-gates">
+                        <div class="gate-item" data-mode-only="business">
+                            <label class="term" data-official="青色申告特別控除">青色控除</label>
+                            <input type="number" id="inc-blue-deduction" class="input-gate" value="650000">
                         </div>
-                        <input type="number" id="ded-family" class="input-modern" placeholder="0">
+                        <div class="gate-item readonly">
+                            <label class="term" data-official="基礎控除">基礎控除</label>
+                            <span id="label-basic-deduction" class="gate-val-static">480,000</span>
+                        </div>
+                        <div class="gate-grid">
+                            <div class="gate-item">
+                                <label class="term" data-official="社会保険料控除">社保・年金</label>
+                                <input type="number" id="ded-social" class="input-gate">
+                            </div>
+                            <div class="gate-item">
+                                <label class="term" data-official="扶養控除">家族扶養</label>
+                                <input type="number" id="ded-family" class="input-gate">
+                            </div>
+                            <div class="gate-item">
+                                <label class="term" data-official="生命保険料控除">生命保険</label>
+                                <input type="number" id="ded-life" class="input-gate">
+                            </div>
+                            <div class="gate-item">
+                                <label class="term" data-official="寄附金控除">ふるさと納税</label>
+                                <input type="number" id="ded-furusato" class="input-gate">
+                            </div>
+                            <div class="gate-item">
+                                <label class="term" data-official="医療費控除">病院代</label>
+                                <input type="number" id="ded-medical" class="input-gate">
+                            </div>
+                            <div class="gate-item">
+                                <label class="term" data-official="小規模企業共済等控除">iDeCo</label>
+                                <input type="number" id="ded-ideco" class="input-gate">
+                            </div>
+                        </div>
                     </div>
 
-                    <h3 class="section-title">⚓ すでに払った分・直接引ける分</h3>
-                    <div class="input-group">
-                        <div class="input-label-row">
-                            <span class="term" data-official="源泉徴収税額">すでに天引きされた税金</span>
+                    <div class="flow-arrow"></div>
+
+                    <!-- 最終着地 -->
+                    <div class="flow-sink">
+                        <div class="sink-box">
+                            <div class="sink-label">課税所得 (国民の義務)</div>
+                            <div class="sink-value" id="val-flow-taxable">0</div>
                         </div>
-                        <input type="number" id="tax-paid" class="input-modern" placeholder="0">
-                    </div>
-                    <div class="input-group">
-                        <div class="input-label-row">
-                            <span class="term" data-official="住宅借入金等特別控除">住宅ローンの割引</span>
-                            <span class="hint">税額そのものを直接引けます</span>
-                        </div>
-                        <input type="number" id="tax-home-loan" class="input-modern" placeholder="0">
                     </div>
                 </div>
             </section>
 
-            <section class="output-area">
-                <div class="card">
-                    <div class="preview-header">
-                        <h3>📋 e-Tax 用 Markdown メモ</h3>
-                        <button id="copy-btn">メモをコピー</button>
+            <!-- Markdown Output -->
+            <section class="output-area-viz card">
+                <div class="preview-header">
+                    <h3>📋 清書用メモ</h3>
+                    <button id="copy-btn">コピー</button>
+                    <button id="clear-btn" class="text-btn">リセット</button>
+                </div>
+                <div id="preview" class="markdown-preview-mini"></div>
+                <div class="final-adjustments">
+                    <div class="input-group-viz">
+                        <label>源泉徴収税額</label>
+                        <input type="number" id="tax-paid" class="input-viz">
                     </div>
-                    <div id="preview" class="markdown-preview"></div>
-                    <div class="data-controls">
-                        <button id="clear-btn" class="btn-clear text-btn">全てのデータを消去する</button>
+                    <div class="input-group-viz">
+                        <label>住宅ローン控除</label>
+                        <input type="number" id="tax-home-loan" class="input-viz">
                     </div>
                 </div>
-                <p class="security-note">※データはブラウザにのみ保存され、サーバーへ送信されることはありません。</p>
+                <p class="security-note">※入力データはブラウザ内にのみ保存されます。</p>
             </section>
         </main>
     </div>
+    <div class="modal-overlay" id="modal-sales-monthly">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>月別売上の入力</h3>
+                <button class="btn-mini-action" id="btn-close-modal">✕</button>
+            </div>
+            <div class="monthly-grid">
+                <div class="month-input-group">
+                    <label class="month-label">1月</label>
+                    <input type="number" class="input-month" data-month="1" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">2月</label>
+                    <input type="number" class="input-month" data-month="2" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">3月</label>
+                    <input type="number" class="input-month" data-month="3" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">4月</label>
+                    <input type="number" class="input-month" data-month="4" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">5月</label>
+                    <input type="number" class="input-month" data-month="5" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">6月</label>
+                    <input type="number" class="input-month" data-month="6" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">7月</label>
+                    <input type="number" class="input-month" data-month="7" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">8月</label>
+                    <input type="number" class="input-month" data-month="8" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">9月</label>
+                    <input type="number" class="input-month" data-month="9" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">10月</label>
+                    <input type="number" class="input-month" data-month="10" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">11月</label>
+                    <input type="number" class="input-month" data-month="11" placeholder="0">
+                </div>
+                <div class="month-input-group">
+                    <label class="month-label">12月</label>
+                    <input type="number" class="input-month" data-month="12" placeholder="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-save" id="btn-save-monthly">反映する</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal for Detailed Expenses -->
+    <div class="modal-overlay-exp" id="modal-expenses-detail">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>経費・仕入の内訳</h3>
+                <button class="btn-mini-action" id="btn-close-exp-modal">✕</button>
+            </div>
+
+            <div class="expense-group">
+                <div class="expense-group-title">🛍️ 仕入 (売上原価)</div>
+                <div class="expense-grid-detail">
+                    <div class="month-input-group">
+                        <label class="month-label">期首商品棚卸高</label>
+                        <input type="number" id="exp-stock-start" class="input-month" placeholder="0">
+                    </div>
+                    <div class="month-input-group">
+                        <label class="month-label">仕入金額</label>
+                        <input type="number" id="exp-purchase" class="input-month" placeholder="0">
+                    </div>
+                    <div class="month-input-group">
+                        <label class="month-label">期末商品棚卸高</label>
+                        <input type="number" id="exp-stock-end" class="input-month" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="expense-group">
+                <div class="expense-group-title">📊 一般経費 (主な科目)</div>
+                <div class="expense-grid-detail">
+                    <div class="month-input-group">
+                        <label class="month-label">消耗品費 (14)</label>
+                        <input type="number" id="exp-supplies" class="input-month" placeholder="0">
+                    </div>
+                    <div class="month-input-group">
+                        <label class="month-label">旅費交通費 (11)</label>
+                        <input type="number" id="exp-travel" class="input-month" placeholder="0">
+                    </div>
+                    <div class="month-input-group">
+                        <label class="month-label">通信費 (12)</label>
+                        <input type="number" id="exp-comm" class="input-month" placeholder="0">
+                    </div>
+                    <div class="month-input-group">
+                        <label class="month-label">地代家賃 (18)</label>
+                        <input type="number" id="exp-rent" class="input-month" placeholder="0">
+                    </div>
+                    <div class="month-input-group">
+                        <label class="month-label">接待交際費 (15)</label>
+                        <input type="number" id="exp-entert" class="input-month" placeholder="0">
+                    </div>
+                    <div class="month-input-group">
+                        <label class="month-label">その他科目</label>
+                        <input type="number" id="exp-other" class="input-month" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-modal btn-save" id="btn-save-expenses">経費を計算して閉じる</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 

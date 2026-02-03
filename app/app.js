@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fields = [
         'inc-salary', 'inc-sales', 'inc-blue-deduction', 'inc-misc', 'inc-dividend',
-        'exp-supplies', 'exp-travel', 'exp-comm', 'exp-rent', 'exp-other',
+        'exp-supplies', 'exp-travel', 'exp-comm', 'exp-rent', 'exp-other', 'exp-entert',
+        'exp-stock-start', 'exp-purchase', 'exp-stock-end',
         'ded-social', 'ded-life', 'ded-ideco', 'ded-earthquake', 'ded-furusato', 'ded-medical', 'ded-family',
         'tax-paid', 'tax-home-loan'
     ];
@@ -86,13 +87,24 @@ document.addEventListener('DOMContentLoaded', () => {
         let filledCount = 0;
         let data = {};
 
-        // Auto-sum expenses
-        const expIds = ['exp-supplies', 'exp-travel', 'exp-comm', 'exp-rent', 'exp-other'];
-        const expTotal = expIds.reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
+        const expIds = ['exp-supplies', 'exp-travel', 'exp-comm', 'exp-rent', 'exp-other', 'exp-entert'];
+        const generalExpTotal = expIds.reduce((sum, id) => sum + (parseInt(document.getElementById(id).value) || 0), 0);
+
+        const cogsTotal = (parseInt(document.getElementById('exp-stock-start').value) || 0) +
+            (parseInt(document.getElementById('exp-purchase').value) || 0) -
+            (parseInt(document.getElementById('exp-stock-end').value) || 0);
+
+        const expTotal = generalExpTotal + Math.max(0, cogsTotal);
         document.getElementById('inc-expenses').value = expTotal;
 
+        // Update summary labels on the scale
+        const cogsEl = document.getElementById('val-summary-cogs');
+        const othersEl = document.getElementById('val-summary-others');
+        if (cogsEl) cogsEl.value = Math.max(0, cogsTotal);
+        if (othersEl) othersEl.value = generalExpTotal;
+
         const activeFields = currentMode === 'employee'
-            ? fields.filter(f => !['inc-sales', 'inc-expenses', 'inc-blue-deduction', ...expIds].includes(f))
+            ? fields.filter(f => !['inc-sales', 'inc-expenses', 'inc-blue-deduction', ...expIds, 'exp-stock-start', 'exp-purchase', 'exp-stock-end'].includes(f))
             : fields.filter(f => f !== 'inc-salary');
 
         fields.forEach(id => {
@@ -100,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!el) return;
             const val = el.value;
             data[id] = parseInt(val) || 0;
-            // Progress logic (exclude Blue Deduction default)
+            // Progress logic
             if (activeFields.includes(id) && val && val !== "0" && id !== 'inc-blue-deduction') filledCount++;
         });
 
@@ -136,8 +148,26 @@ document.addEventListener('DOMContentLoaded', () => {
             basicDeduction = 950000;
         }
 
-        const totalDeductions = basicDeduction + data['ded-social'] + data['ded-life'] + data['ded-ideco'] + data['ded-earthquake'] + data['ded-furusato'] + data['ded-medical'] + data['ded-family'];
+        const deductionList = [
+            { label: '基礎控除', value: basicDeduction },
+            { id: 'ded-social', label: '社会保険料' },
+            { id: 'ded-life', label: '生命保険料' },
+            { id: 'ded-ideco', label: 'iDeCo/小規模企業共済' },
+            { id: 'ded-earthquake', label: '地震保険料' },
+            { id: 'ded-furusato', label: '寄附金(ふるさと納税)' },
+            { id: 'ded-medical', label: '医療費' },
+            { id: 'ded-family', label: '配偶者・扶養' }
+        ];
+
+        const totalDeductions = deductionList.reduce((sum, d) => {
+            const val = d.id ? data[d.id] : d.value;
+            return sum + (val || 0);
+        }, 0);
+
         const taxableBase = Math.max(0, displayIncome - totalDeductions);
+
+        // Update Visuals
+        updateVisuals(data, displayIncome, totalDeductions, taxableBase, deductionList);
 
         // Markdown Output
         let md = `## 【e-Tax 清書用メモ】 ${currentYear}年分 (${currentMode === 'employee' ? '会社員' : '個人事業主'}) \n`;
@@ -156,14 +186,10 @@ document.addEventListener('DOMContentLoaded', () => {
         md += `\n`;
 
         md += `### 2. 所得控除の入力\n`;
-        md += `- 基礎控除: ${basicDeduction.toLocaleString()} 円\n`;
-        if (data['ded-social'] > 0) md += `- 社会保険料控除: ${data['ded-social'].toLocaleString()} 円\n`;
-        if (data['ded-life'] > 0) md += `- 生命保険料控除: ${data['ded-life'].toLocaleString()} 円\n`;
-        if (data['ded-ideco'] > 0) md += `- 小規模企業共済: ${data['ded-ideco'].toLocaleString()} 円\n`;
-        if (data['ded-earthquake'] > 0) md += `- 地震保険料控除: ${data['ded-earthquake'].toLocaleString()} 円\n`;
-        if (data['ded-furusato'] > 0) md += `- 寄附金控除(ふるさと納税): ${data['ded-furusato'].toLocaleString()} 円\n`;
-        if (data['ded-medical'] > 0) md += `- 医療費控除: ${data['ded-medical'].toLocaleString()} 円\n`;
-        if (data['ded-family'] > 0) md += `- 配偶者・扶養控除: ${data['ded-family'].toLocaleString()} 円\n`;
+        deductionList.forEach(d => {
+            const val = d.id ? data[d.id] : d.value;
+            if (val > 0) md += `- ${d.label}: ${val.toLocaleString()} 円\n`;
+        });
         md += `**👉 控除の総額: ${totalDeductions.toLocaleString()} 円**\n\n`;
 
         md += `### 3. 税額控除・支払済み\n`;
@@ -174,6 +200,64 @@ document.addEventListener('DOMContentLoaded', () => {
         md += `---\n*このメモはブラウザの個人用データ(Local)に保存されています。*`;
 
         document.getElementById('preview').textContent = md;
+    }
+
+    function updateVisuals(data, totalIncome, totalDeductions, taxable, dedList) {
+        // Stage 1: Scale (Only business sales vs expenses)
+        const scaleBeam = document.getElementById('scale-beam');
+        const bizIncomeEl = document.getElementById('viz-biz-income');
+        const incStack = document.getElementById('income-stack');
+        const expStack = document.getElementById('expense-stack');
+
+        if (currentMode === 'business') {
+            const sales = data['inc-sales'] || 0;
+            const expenses = data['inc-expenses'] || 0;
+            const bizProfit = Math.max(0, sales - expenses); // Result on scale is gross profit
+            bizIncomeEl.textContent = bizProfit.toLocaleString();
+
+            const maxRef = Math.max(1000000, sales, expenses);
+            const ratio = Math.max(-1, Math.min(1, (sales - expenses) / maxRef));
+            const angle = -ratio * 15;
+
+            scaleBeam.style.transform = `rotate(${angle}deg)`;
+            const pans = document.querySelectorAll('.scale-pan-viz');
+            pans.forEach(p => p.style.transform = `rotate(${-angle}deg)`);
+
+            const createBlocks = (container, amount, type) => {
+                container.innerHTML = '';
+                const blockCount = Math.min(10, Math.ceil(amount / (maxRef / 10 || 1)));
+                for (let i = 0; i < blockCount; i++) {
+                    const b = document.createElement('div');
+                    b.className = `block ${type}`;
+                    b.style.opacity = 1 - (i * 0.05);
+                    container.appendChild(b);
+                }
+            };
+            createBlocks(incStack, sales, 'income');
+            createBlocks(expStack, expenses, 'expense');
+        }
+
+        // Stage 2: Flow (Deductions)
+        document.getElementById('val-flow-income').textContent = totalIncome.toLocaleString();
+        document.getElementById('val-flow-taxable').textContent = taxable.toLocaleString();
+
+        // Update Basic Deduction display
+        const basicDedEl = document.getElementById('label-basic-deduction');
+        if (basicDedEl) {
+            const basic = dedList.find(d => d.label === '基礎控除')?.value || 0;
+            basicDedEl.textContent = basic.toLocaleString();
+        }
+
+        // Highlight active gates
+        fields.forEach(id => {
+            const input = document.getElementById(id);
+            if (input && input.closest('.gate-item')) {
+                const gate = input.closest('.gate-item');
+                const val = parseInt(input.value) || 0;
+                gate.style.opacity = val > 0 ? '1' : '0.4';
+                gate.style.borderColor = val > 0 ? 'var(--secondary)' : 'var(--border)';
+            }
+        });
     }
 
     // Event Listeners for inputs
@@ -205,6 +289,48 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('shinkokunSettings');
             location.reload();
         }
+    });
+
+    // Monthly Sales Logic
+    const modalSales = document.getElementById('modal-sales-monthly');
+    const openSalesBtn = document.getElementById('btn-open-monthly');
+    const closeSalesBtn = document.getElementById('btn-close-modal');
+    const saveSalesBtn = document.getElementById('btn-save-monthly');
+    const monthInputs = document.querySelectorAll('.input-month[data-month]');
+
+    if (openSalesBtn) openSalesBtn.addEventListener('click', () => modalSales.classList.add('active'));
+    if (closeSalesBtn) closeSalesBtn.addEventListener('click', () => modalSales.classList.remove('active'));
+    if (saveSalesBtn) {
+        saveSalesBtn.addEventListener('click', () => {
+            let total = 0;
+            monthInputs.forEach(input => total += parseInt(input.value) || 0);
+            document.getElementById('inc-sales').value = total;
+            update();
+            saveData();
+            modalSales.classList.remove('active');
+        });
+    }
+
+    // Expenses Detail Logic
+    const modalExp = document.getElementById('modal-expenses-detail');
+    const openExpBtn = document.getElementById('btn-open-expenses');
+    const closeExpBtn = document.getElementById('btn-close-exp-modal');
+    const saveExpBtn = document.getElementById('btn-save-expenses');
+
+    if (openExpBtn) openExpBtn.addEventListener('click', () => modalExp.classList.add('active'));
+    if (closeExpBtn) closeExpBtn.addEventListener('click', () => modalExp.classList.remove('active'));
+    if (saveExpBtn) {
+        saveExpBtn.addEventListener('click', () => {
+            update();
+            saveData();
+            modalExp.classList.remove('active');
+        });
+    }
+
+    // Close modals on outside click
+    window.addEventListener('click', (e) => {
+        if (e.target === modalSales) modalSales.classList.remove('active');
+        if (e.target === modalExp) modalExp.classList.remove('active');
     });
 
     // Initial Load

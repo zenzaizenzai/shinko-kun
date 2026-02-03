@@ -27,6 +27,8 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
+    font-size: 18px;
+    /* Base font size increased */
 }
 
 #app {
@@ -47,6 +49,7 @@ header h1 {
     font-weight: 800;
     background: linear-gradient(135deg, #a5b4fc, #fda4af);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
 }
@@ -87,7 +90,7 @@ header h1 {
 }
 
 .mode-btn {
-    padding: 0.6rem 1.4rem;
+    padding: 0.8rem 1.8rem;
     border: none;
     background: transparent;
     color: var(--text-dim);
@@ -96,7 +99,7 @@ header h1 {
     cursor: pointer;
     transition: 0.3s;
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 
 .mode-btn.active {
@@ -158,35 +161,59 @@ main {
     margin-top: 0;
 }
 
+.doc-badge {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-dim);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    margin-left: 10px;
+    font-weight: normal;
+    vertical-align: middle;
+    letter-spacing: 0.05em;
+    font-family: 'Inter', sans-serif;
+}
+
 /* Rosetta Tooltip */
 .term {
     position: relative;
-    border-bottom: 1px dashed var(--primary);
+    border-bottom: 2px dotted var(--primary);
     cursor: help;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--primary);
+    transition: 0.3s;
 }
 
 .term::after {
-    content: attr(data-official);
+    content: "👉 " attr(data-official);
     position: absolute;
-    bottom: 130%;
-    left: 0;
+    bottom: 150%;
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--tooltip-bg);
     color: #fff;
-    padding: 0.5rem 0.8rem;
+    padding: 0.6rem 1rem;
     border-radius: 10px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     white-space: nowrap;
     opacity: 0;
     visibility: hidden;
-    transition: 0.3s;
+    transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     border: 1px solid var(--primary);
-    z-index: 100;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    z-index: 200;
+}
+
+.term:hover {
+    background: var(--primary-dim);
 }
 
 .term:hover::after {
     opacity: 1;
     visibility: visible;
+    bottom: 110%;
 }
 
 /* Inputs */
@@ -316,6 +343,530 @@ main {
 .text-btn:hover {
     color: var(--secondary);
     opacity: 1;
+}
+
+/* Visual Main Layout */
+.visual-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.viz-stage {
+    padding: 2rem;
+    position: relative;
+}
+
+.stage-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Real Scale Visualizer */
+.scale-container-viz {
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 50px;
+    position: relative;
+    overflow: visible;
+}
+
+.scale-base-viz {
+    width: 100px;
+    height: 10px;
+    background: var(--text-dim);
+    position: absolute;
+    bottom: 50px;
+    border-radius: 5px;
+}
+
+.scale-pillar-viz {
+    width: 12px;
+    height: 250px;
+    background: var(--text-dim);
+    position: absolute;
+    bottom: 10px;
+    left: 44px;
+    border-radius: 6px;
+}
+
+.scale-beam-viz {
+    position: absolute;
+    bottom: 240px;
+    /* Pillar top */
+    left: -190px;
+    width: 480px;
+    height: 8px;
+    background: var(--text-dim);
+    border-radius: 4px;
+    transform-origin: center center;
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+}
+
+.scale-pan-viz {
+    position: absolute;
+    top: 8px;
+    width: 220px;
+    transform-origin: top center;
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.left-pan-viz {
+    left: -110px;
+}
+
+.right-pan-viz {
+    right: -110px;
+}
+
+/* Keep content vertical when beam tilts */
+.pan-content {
+    background: #fff;
+    /* Paper-like background */
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    /* Paper corners */
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(255, 255, 255, 0.05);
+    position: relative;
+    min-height: 240px;
+}
+
+.pan-content::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+}
+
+.pan-label-top {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-align: left;
+    font-weight: 800;
+    border-bottom: 2px solid #1e293b;
+    padding-bottom: 2px;
+    margin-bottom: 5px;
+}
+
+.input-viz {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 0.5rem;
+    color: #0f172a;
+    font-size: 1.3rem;
+    font-family: 'Fira Code', monospace;
+    font-weight: 700;
+}
+
+.input-viz-mini {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 2px;
+    padding: 0.3rem;
+    color: #475569;
+    font-size: 1rem;
+}
+
+/* Red lines etc to look like official form */
+.expense-details-grid {
+    border-top: 1px solid #fecaca;
+    padding-top: 8px;
+}
+
+.pan-visual {
+    height: 30px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 0;
+    margin-top: auto;
+}
+
+.pan-stack {
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 2px;
+}
+
+/* Inputs in Viz */
+.input-viz {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem;
+    color: white;
+    width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.input-viz:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+    outline: none;
+}
+
+.input-viz-mini {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    width: 100%;
+    text-align: center;
+}
+
+.expense-details-grid {
+    border-top: 2px solid #fecaca;
+    padding-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    background-image: linear-gradient(#fee2e2 1px, transparent 1px);
+    background-size: 100% 30px;
+}
+
+.pan-label-mini {
+    font-size: 0.8rem;
+    color: #f87171;
+    margin-bottom: 2px;
+    font-weight: bold;
+}
+
+.stage-result {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+/* Flow Container */
+.flow-container-new {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.source-box,
+.sink-box {
+    background: var(--primary-dim);
+    border: 1px solid var(--primary);
+    padding: 1.5rem;
+    border-radius: 20px;
+    min-width: 300px;
+    text-align: center;
+}
+
+.sink-box {
+    border-color: var(--secondary);
+    background: rgba(244, 63, 94, 0.1);
+}
+
+.source-label,
+.sink-label {
+    font-size: 1rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+}
+
+.val,
+.sink-value {
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.source-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.mini-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.75rem;
+}
+
+.input-flow {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--border);
+    color: white;
+    text-align: center;
+    width: 80px;
+    font-size: 1rem;
+}
+
+.flow-arrow {
+    height: 40px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    margin: 10px 0;
+}
+
+/* Gates */
+.flow-gates {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    align-items: center;
+}
+
+.gate-item {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--border);
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 300px;
+    justify-content: space-between;
+}
+
+.gate-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+    max-width: 650px;
+}
+
+.gate-grid .gate-item {
+    width: auto;
+}
+
+.input-gate {
+    background: transparent;
+    border: none;
+    color: var(--secondary);
+    font-weight: bold;
+    text-align: right;
+    width: 120px;
+    font-size: 1.4rem;
+}
+
+.gate-val-static {
+    font-weight: bold;
+    color: var(--text-dim);
+}
+
+/* Output area integration */
+.markdown-preview-mini {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+}
+
+.final-adjustments {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.block {
+    height: 8px;
+    border-radius: 2px;
+    width: 100%;
+}
+
+.block.income {
+    background: #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.block.expense {
+    background: #f43f5e;
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
+}
+
+/* Modal for Monthly Sales */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: #fff;
+    color: #1e293b;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #1e293b;
+    padding-bottom: 0.5rem;
+}
+
+.monthly-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.month-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.month-label {
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: #64748b;
+}
+
+.input-month {
+    width: 100%;
+    padding: 0.4rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn-modal {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-save {
+    background: var(--primary);
+    color: white;
+}
+
+.input-with-action {
+    display: flex;
+    gap: 5px;
+    position: relative;
+}
+
+.btn-mini-action {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 0 8px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    color: #475569;
+}
+
+.btn-mini-action:hover {
+    background: #e2e8f0;
+}
+
+/* Modal for Expenses Breakdown */
+.modal-overlay-exp {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+}
+
+.modal-overlay-exp.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.expense-group-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.8rem;
+    padding-left: 5px;
+    border-left: 4px solid var(--secondary);
+}
+
+.expense-grid-detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.input-with-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.input-with-action .input-viz {
+    flex: 1;
 }
 
 .security-note {
